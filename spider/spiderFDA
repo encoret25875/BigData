@@ -1,0 +1,58 @@
+import codecs
+import csv
+import random
+import threading
+import time
+import requests
+from bs4 import BeautifulSoup
+
+useragent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 ' \
+            'Safari/537.36 '
+headers = {'User-Agent': useragent}
+threads = []
+
+food_title = ["名稱", "單位", '公克數']
+
+proxies = {
+    "http": "14.140.131.82:3128"
+}
+
+
+def foodfunc():
+    csvFile = codecs.open('./food.csv', 'wb', encoding='utf-8-sig')
+    csvWriter = csv.writer(csvFile)
+    csvWriter.writerow(food_title)
+    for page in range(1, 220):
+        # 抓食品資料
+        url = 'https://consumer.fda.gov.tw//Food/TFND.aspx?nodeID=178&p=%d#ctl00_content_ListPanel' % page
+        res = requests.get(url, headers=headers, proxies=proxies)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        action_span = soup.select('td.txt_L a')
+        if action_span == 0:
+            break
+        for food in action_span:
+            #print(food)
+            foodName = food.text
+            foodURL = 'https://consumer.fda.gov.tw/Food/' + food['href']
+            #print(foodName, foodURL)
+            foodRes = requests.get(foodURL, headers=headers, proxies=proxies)
+            foodsoup = BeautifulSoup(foodRes.text, 'html.parser')
+            # food_num = foodsoup.select_one('#ctl00_content_txtEP1Weight').string
+            food_unit = foodsoup.select_one('#ctl00_content_txtEP1Desc').string
+            food_g = foodsoup.select_one('#ctl00_content_txtEP1Result').string
+            print(foodName, food_unit, food_g)
+            rowData = [foodName, food_unit, food_g]
+            csvWriter.writerow(rowData)
+    csvFile.close()
+
+
+
+def main():
+    foodfunc()
+
+
+if __name__ == '__main__':
+    start = time.clock()
+    main()
+    end = time.clock()
+    print("CPU Time: ", end - start)

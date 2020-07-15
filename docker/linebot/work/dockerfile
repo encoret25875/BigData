@@ -1,0 +1,9 @@
+FROM jupyter/base-notebook
+RUN pip install Flask==0.12 requests line-bot-sdk
+RUN pip install keras==2.4.2
+RUN pip install pillow
+RUN pip install tensorflow==2.2.0
+RUN pip install matplotlib
+RUN pip install pandas
+RUN pip install opencv-python
+RUN pip install opencv-contrib-python

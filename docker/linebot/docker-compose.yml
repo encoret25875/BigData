@@ -1,0 +1,15 @@
+
+version: '2'
+services:
+  mission1:
+    build: 
+      context: ./work
+      dockerfile: dockerfile
+    container_name: mission1-jupyter-notebook
+    ports:
+      - "8888:8888"
+      - "5000:5000"
+    volumes:
+      - ./work:/home/jovyan/work/
+    command: start-notebook.sh --NotebookApp.token=''
+    restart: always
